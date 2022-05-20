@@ -1,6 +1,29 @@
 import "./Calendar.css";
-
+import Goo from "./Goo.tsx";
+import React from "react";
 function Calendar({ year, month, className }) {
+  const gridUnit = 14.2857142857;
+
+  const [blackedOut, setBlackedOut] = React.useState({});
+
+  function addBlackedOut(keyValue) {
+    let newBlackedOut = blackedOut;
+    let gridX = gridUnit / 2 + (keyValue % 7) * gridUnit + "%";
+    let gridY = (gridUnit * 3) / 2 + Math.floor(keyValue / 7) * gridUnit + "%";
+    let newCircle = (
+      <circle
+        key={"blob" + keyValue}
+        cx={gridX}
+        cy={gridY}
+        fill="black"
+        r="1.35em"
+        style={{ animation: animationString(), transformOrigin: `${gridX} ${gridY}` }}
+      />
+    );
+    newBlackedOut[keyValue] = newCircle;
+    setBlackedOut({ ...newBlackedOut });
+  }
+
   const englishMonthNames = [
     "January",
     "February",
@@ -31,9 +54,20 @@ function Calendar({ year, month, className }) {
       i < firstDayOfMonth || i >= firstDayOfMonth + daysInMonth
         ? "__Calendar_Grid_Inactive"
         : "__Calendar_Grid_Active";
-    let className = "__Calendar_Grid_Item __Calendar_Grid_Num " + active;
-    numberGrid.push({ className: className, day: day, keyValue: "grid" + i });
+    // Check if date is blacked out
+    let blackedOutName = blackedOut[i] ? " __Calendar_Grid_BlackedOut" : "";
+    let className =
+      "__Calendar_Grid_Item __Calendar_Grid_Num " + active + blackedOutName;
+    numberGrid.push({ className: className, day: day, keyValue: i });
   }
+
+  const animationString = () => {
+    let duration = Math.random() * (30 - 20) + 20;
+    let delay = Math.random() * 3;
+    let duration2 = Math.random() * (30 - 20) + 20;
+    let delay2 = Math.random() * 3;
+    return `shake ${duration}s ease ${delay}s infinite, breathe ${duration2}s ease ${delay2}s infinite, scale_in 0.5s ease 1`;
+  };
 
   return (
     <div className={className + " __Calendar"}>
@@ -41,18 +75,33 @@ function Calendar({ year, month, className }) {
         <h1>{englishMonthNames[month]}</h1>
       </header>
       <div className="__Calendar_Body">
-        <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">M</p>
-        <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">S</p>
-        <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">T</p>
-        <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">W</p>
-        <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">T</p>
-        <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">F</p>
-        <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">S</p>
-        {numberGrid.map((gridItem) => (
-          <p className={gridItem.className} key={gridItem.keyValue}>
-            {gridItem.day}
-          </p>
-        ))}
+        <div className="__Calendar_Grid">
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">M</p>
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">S</p>
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">T</p>
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">W</p>
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">T</p>
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">F</p>
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">S</p>
+          {numberGrid.map((gridItem) => (
+            <p
+              className={gridItem.className}
+              key={gridItem.keyValue}
+              onClick={() => {
+                addBlackedOut(gridItem.keyValue);
+              }}
+            >
+              {gridItem.day}
+            </p>
+          ))}
+        </div>
+        <div className="__Calendar_Metaballs">
+          <Goo className="__Calendar_Goo">
+            <svg style={{ filter: "blur(0.6em)" }}>
+              {Object.values(blackedOut)}
+            </svg>
+          </Goo>
+        </div>
       </div>
     </div>
   );
