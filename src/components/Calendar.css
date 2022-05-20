@@ -1,3 +1,14 @@
-.Calendar{
-    
+.__Calendar{
+    display:block;
+    aspect-ratio: 1 / 1;
+}
+
+.__Calendar_Body{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+}
+
+.__Calendar_Grid_Active{
+    color:red;
 }
