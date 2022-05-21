@@ -6,6 +6,8 @@
   color: black;
   padding: 1em;
   /* Adjust Component Scale with Font Size Percentages*/
+  /* Add subtle drop shadow */
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
 }
 
 .__Calendar_Header h1 {
