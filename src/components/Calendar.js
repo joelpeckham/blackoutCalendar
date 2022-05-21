@@ -75,7 +75,7 @@ function Calendar({ year, month, className, target }) {
     let delay = Math.random();
     let duration2 = Math.random() * (30 - 20) + 20;
     let delay2 = Math.random();
-    return `shake ${duration}s ease ${delay}s infinite, breathe ${duration2}s ease ${delay2}s infinite, scale_in 0.2s ease 1`;
+    return `shake ${duration}s ease ${delay}s infinite, breathe ${duration2}s ease ${delay2}s infinite, scale_in 0.3s ease-in-out 1`;
   };
 
   const [mouseState, setMouseState] = React.useState("up");
