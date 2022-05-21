@@ -1,23 +1,28 @@
 import "./Calendar.css";
 import Goo from "./Goo.tsx";
 import React from "react";
-function Calendar({ year, month, className }) {
+function Calendar({ year, month, className, target }) {
   const gridUnit = 14.2857142857;
 
   const [blackedOut, setBlackedOut] = React.useState({});
+  let targetKey = null;
 
   function addBlackedOut(keyValue) {
     let newBlackedOut = blackedOut;
     let gridX = gridUnit / 2 + (keyValue % 7) * gridUnit + "%";
     let gridY = (gridUnit * 3) / 2 + Math.floor(keyValue / 7) * gridUnit + "%";
+    let fillColor = keyValue === targetKey ? "black" : "black";
     let newCircle = (
       <circle
         key={"blob" + keyValue}
         cx={gridX}
         cy={gridY}
-        fill="black"
+        fill={fillColor}
         r="1.35em"
-        style={{ animation: animationString(), transformOrigin: `${gridX} ${gridY}` }}
+        style={{
+          animation: animationString(),
+          transformOrigin: `${gridX} ${gridY}`,
+        }}
       />
     );
     newBlackedOut[keyValue] = newCircle;
@@ -55,6 +60,10 @@ function Calendar({ year, month, className }) {
         ? "__Calendar_Grid_Inactive"
         : "__Calendar_Grid_Active";
     // Check if date is blacked out
+    if (active === "__Calendar_Grid_Active" && day === target) {
+      active += " __Calendar_Grid_Target";
+      targetKey = i;
+    }
     let blackedOutName = blackedOut[i] ? " __Calendar_Grid_BlackedOut" : "";
     let className =
       "__Calendar_Grid_Item __Calendar_Grid_Num " + active + blackedOutName;
@@ -63,11 +72,50 @@ function Calendar({ year, month, className }) {
 
   const animationString = () => {
     let duration = Math.random() * (30 - 20) + 20;
-    let delay = Math.random() * 3;
+    let delay = Math.random();
     let duration2 = Math.random() * (30 - 20) + 20;
-    let delay2 = Math.random() * 3;
-    return `shake ${duration}s ease ${delay}s infinite, breathe ${duration2}s ease ${delay2}s infinite, scale_in 0.5s ease 1`;
+    let delay2 = Math.random();
+    return `shake ${duration}s ease ${delay}s infinite, breathe ${duration2}s ease ${delay2}s infinite, scale_in 0.2s ease 1`;
   };
+
+  const [mouseState, setMouseState] = React.useState("up");
+  const [deleteState, setDeleteState] = React.useState(false);
+
+  function handleGoo(keyValue) {
+    if (!deleteState) {
+      addBlackedOut(keyValue);
+    } else {
+      delete blackedOut[keyValue];
+      setBlackedOut({ ...blackedOut });
+    }
+  }
+  function gridMouseDown(e) {
+    setMouseState("down");
+    let targetClassList = e.target.classList;
+    if (
+      targetClassList.contains("__Calendar_Grid_Num") &&
+      targetClassList.contains("__Calendar_Grid_Active")
+    ) {
+      let targetKey = e.target.getAttribute("id");
+      setDeleteState(blackedOut[targetKey] ? true : false);
+      handleGoo(targetKey);
+    }
+  }
+  function gridMouseMove(e) {
+    if (mouseState === "down") {
+      let targetClassList = e.target.classList;
+      if (
+        targetClassList.contains("__Calendar_Grid_Num") &&
+        targetClassList.contains("__Calendar_Grid_Active")
+      ) {
+        let targetKey = e.target.getAttribute("id");
+        handleGoo(targetKey);
+      }
+    }
+  }
+  function gridMouseUp(e) {
+    setMouseState("up");
+  }
 
   return (
     <div className={className + " __Calendar"}>
@@ -75,7 +123,13 @@ function Calendar({ year, month, className }) {
         <h1>{englishMonthNames[month]}</h1>
       </header>
       <div className="__Calendar_Body">
-        <div className="__Calendar_Grid">
+        <div
+          className="__Calendar_Grid"
+          onMouseDown={gridMouseDown}
+          onMouseMove={gridMouseMove}
+          onMouseUp={gridMouseUp}
+          onMouseLeave={gridMouseUp}
+        >
           <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">M</p>
           <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">S</p>
           <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">T</p>
@@ -87,9 +141,7 @@ function Calendar({ year, month, className }) {
             <p
               className={gridItem.className}
               key={gridItem.keyValue}
-              onClick={() => {
-                addBlackedOut(gridItem.keyValue);
-              }}
+              id={gridItem.keyValue}
             >
               {gridItem.day}
             </p>
