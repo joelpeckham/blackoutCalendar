@@ -130,8 +130,8 @@ function Calendar({ year, month, className, target }) {
           onMouseUp={gridMouseUp}
           onMouseLeave={gridMouseUp}
         >
-          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">M</p>
           <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">S</p>
+          <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">M</p>
           <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">T</p>
           <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">W</p>
           <p className="__Calendar_Grid_Item __Calendar_Grid_Col_Label">T</p>
