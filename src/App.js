@@ -1,17 +1,27 @@
 // import logo from './logo.svg';
 import './App.css';
-import Calendar from './components/Calendar';
+import CalendarCarousel from './components/CalendarCarousel.tsx';
 import React from 'react';
 
 function App() {
-
+  let dates = [
+    {
+      month: 0,
+      year: 2020,
+    },
+    {
+      month: 1,
+      year: 2020,
+    },
+    {
+      month: 2,
+      year: 2020,
+    },
+  ]
   return (
     <div className="App">
       <header className="App-header">
-        <Calendar className = "Calendar" year={2022} month={11} target={null}/>
-        <Calendar className = "Calendar" year={2023} month={0} target={null}/>
-        <Calendar className = "Calendar" year={2023} month={1} target={20}/>
-        <Calendar className = "Calendar" year={2023} month={2} target={null}/>
+        <CalendarCarousel dates={dates}/>
       </header>
     </div>
   );
