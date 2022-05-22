@@ -1,53 +1,102 @@
 import "./Calendar.css";
 import Goo from "./Goo.tsx";
 import React from "react";
+import { isSafari } from "react-device-detect";
+
+const englishMonthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const gridUnit = 14.2857142857;
+
 function Calendar({ year, month, className, target }) {
-  const gridUnit = 14.2857142857;
+  const [mouseState, setMouseState] = React.useState("up");
+  const [deleteState, setDeleteState] = React.useState(false);
+  const [blackedOut, setBlackedOut] = React.useState({}); //Map of keyValue to bool
 
-  const [blackedOut, setBlackedOut] = React.useState({});
-  let targetKey = null;
-
-  function addBlackedOut(keyValue) {
-    let newBlackedOut = blackedOut;
-    let gridX = gridUnit / 2 + (keyValue % 7) * gridUnit + "%";
-    let gridY = (gridUnit * 3) / 2 + Math.floor(keyValue / 7) * gridUnit + "%";
-    let fillColor = keyValue === targetKey ? "black" : "black";
-    let newCircle = (
-      <circle
-        key={"blob" + keyValue}
-        cx={gridX}
-        cy={gridY}
-        fill={fillColor}
-        r="1.35em"
-        style={{
-          animation: animationString(),
-          transformOrigin: `${gridX} ${gridY}`,
-        }}
-      />
-    );
-    newBlackedOut[keyValue] = newCircle;
-    setBlackedOut({ ...newBlackedOut });
+  function handleGooification(e) {
+    if (!e.target.className.includes("__Calendar_Grid_Active")) return;
+    const keyValue = e.target.getAttribute("id");
+    if (blackedOut[keyValue] && deleteState) {
+      blackedOut[keyValue] = false;
+    } else if (!blackedOut[keyValue] && !deleteState) {
+      blackedOut[keyValue] = true;
+    }
+    setBlackedOut({ ...blackedOut });
   }
 
-  const englishMonthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  function gridMouseDown(e) {
+    if (e.target.className.includes("__Calendar_Grid_BlackedOut")) {
+      setDeleteState(true);
+    } else {
+      setDeleteState(false);
+    }
+    setMouseState("down");
+    handleGooification(e);
+  }
+  function gridMouseMove(e) {
+    if (mouseState === "down") {
+      handleGooification(e);
+    }
+  }
+  function gridMouseUp(e) {
+    setMouseState("up");
+  }
+
+  function makeGooBlob(keyValue, radius = 1.35) {
+    const gridX = gridUnit / 2 + (keyValue % 7) * gridUnit + "%";
+    const gridY =
+      (gridUnit * 3) / 2 + Math.floor(keyValue / 7) * gridUnit + "%";
+    const visibility = !blackedOut[keyValue] ? "inVisible" : "isVisible";
+
+    const animationChoice = (keyValue % 8) + 1;
+    const animationClass = !isSafari ? `pulse${animationChoice}` : "";
+
+    let gooStyle = {
+      backgroundColor: "black",
+      borderRadius: `${radius}em`,
+      position: "absolute",
+    };
+    if (isSafari) {
+      gooStyle = { ...gooStyle, transition: "none" };
+    }
+
+    return (
+      <div
+        className={`__gooCircle_continer `}
+        key={keyValue}
+        style={{
+          width: `${radius * 2}em`,
+          height: `${radius * 2}em`,
+          position: "absolute",
+          left: `calc(${gridX} - ${radius}em)`,
+          top: `calc(${gridY} - ${radius}em)`,
+        }}
+      >
+        <div
+          className={`__gooCircle ${visibility} ${animationClass} `}
+          style={gooStyle}
+        ></div>
+      </div>
+    );
+  }
 
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   let numberGrid = [];
+  let gooGrid = [];
 
   let startDate = new Date(year, month, 1 - firstDayOfMonth);
   let currentDate = new Date(startDate);
@@ -60,62 +109,26 @@ function Calendar({ year, month, className, target }) {
         ? "__Calendar_Grid_Inactive"
         : "__Calendar_Grid_Active";
     // Check if date is blacked out
+    const isblackedOut = blackedOut[i] ? " __Calendar_Grid_BlackedOut" : "";
     if (active === "__Calendar_Grid_Active" && day === target) {
       active += " __Calendar_Grid_Target";
-      targetKey = i;
     }
-    let blackedOutName = blackedOut[i] ? " __Calendar_Grid_BlackedOut" : "";
     let className =
-      "__Calendar_Grid_Item __Calendar_Grid_Num " + active + blackedOutName;
+      "__Calendar_Grid_Item __Calendar_Grid_Num " + active + isblackedOut;
     numberGrid.push({ className: className, day: day, keyValue: i });
+    gooGrid.push(makeGooBlob(i));
   }
 
-  const animationString = () => {
-    let duration = Math.random() * (30 - 20) + 20;
-    let delay = Math.random();
-    let duration2 = Math.random() * (30 - 20) + 20;
-    let delay2 = Math.random();
-    return `shake ${duration}s ease ${delay}s infinite, breathe ${duration2}s ease ${delay2}s infinite, scale_in 0.3s ease-in-out 1`;
-  };
-
-  const [mouseState, setMouseState] = React.useState("up");
-  const [deleteState, setDeleteState] = React.useState(false);
-
-  function handleGoo(keyValue) {
-    if (!deleteState) {
-      addBlackedOut(keyValue);
-    } else {
-      delete blackedOut[keyValue];
-      setBlackedOut({ ...blackedOut });
+  React.useEffect(() => {
+    if (isSafari) {
+      let parent = document.getElementsByClassName("__Calendar")[0];
+      parent.style.opacity = "99.9%";
+      const timeout = setTimeout(() => {
+        parent.style.opacity = "100%";
+      }, 0);
+      return () => clearTimeout(timeout);
     }
-  }
-  function gridMouseDown(e) {
-    setMouseState("down");
-    let targetClassList = e.target.classList;
-    if (
-      targetClassList.contains("__Calendar_Grid_Num") &&
-      targetClassList.contains("__Calendar_Grid_Active")
-    ) {
-      let targetKey = e.target.getAttribute("id");
-      setDeleteState(blackedOut[targetKey] ? true : false);
-      handleGoo(targetKey);
-    }
-  }
-  function gridMouseMove(e) {
-    if (mouseState === "down") {
-      let targetClassList = e.target.classList;
-      if (
-        targetClassList.contains("__Calendar_Grid_Num") &&
-        targetClassList.contains("__Calendar_Grid_Active")
-      ) {
-        let targetKey = e.target.getAttribute("id");
-        handleGoo(targetKey);
-      }
-    }
-  }
-  function gridMouseUp(e) {
-    setMouseState("up");
-  }
+  }, [blackedOut]);
 
   return (
     <div className={className + " __Calendar"}>
@@ -124,7 +137,7 @@ function Calendar({ year, month, className, target }) {
       </header>
       <div className="__Calendar_Body">
         <div
-          className="__Calendar_Grid"
+          className={"__Calendar_Grid "}
           onMouseDown={gridMouseDown}
           onMouseMove={gridMouseMove}
           onMouseUp={gridMouseUp}
@@ -148,10 +161,12 @@ function Calendar({ year, month, className, target }) {
           ))}
         </div>
         <div className="__Calendar_Metaballs">
-          <Goo className="__Calendar_Goo">
-            <svg style={{ filter: "blur(0.6em)" }}>
-              {Object.values(blackedOut)}
-            </svg>
+          <Goo className="__Calendar_Goo" intensity="none">
+            <div
+              style={{ filter: "blur(0.5em)", width: "100%", height: "100%" }}
+            >
+              {[...gooGrid]}
+            </div>
           </Goo>
         </div>
       </div>

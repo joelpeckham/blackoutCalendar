@@ -11,7 +11,7 @@ const Goo = ({
   children: React.ReactNode;
   className?: string;
   composite?: boolean;
-  intensity?: "weak" | "medium" | "strong";
+  intensity?: "weak" | "medium" | "strong" | "none";
   id?: string;
   style?: React.CSSProperties;
 }) => {
@@ -20,13 +20,16 @@ const Goo = ({
   useEffect(() => {
     setHeight(ref.current.clientHeight);
   }, []);
-  // const blur = intensity === "weak" ? 8 : intensity === "strong" ? 16 : 12;
+
+const blur = intensity === "weak" ? 8 : intensity === "strong" ? 16 : intensity === "none" ? 0 : 12;
+
   const alpha = height * 0.1;
   const shift = alpha / -2;
   const r = "1 0 0 0 0";
   const g = "0 1 0 0 0";
   const b = "0 0 1 0 0";
   const a = `0 0 0 ${alpha} ${shift}`;
+  // const a = `0 0 0 1 0`;
 
   return (
     <>
@@ -39,10 +42,10 @@ const Goo = ({
       >
         <defs>
           <filter colorInterpolationFilters="sRGB" data-testid="filter" id={id}>
-            {/* <feGaussianBlur
+            <feGaussianBlur
               data-testid="blur"
               stdDeviation={blur}
-            /> */}
+            />
             <feColorMatrix values={`${r} ${g} ${b} ${a}`} />
             {composite && (
               <feComposite
