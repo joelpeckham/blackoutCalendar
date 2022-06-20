@@ -17,11 +17,19 @@ function App() {
       month: 2,
       year: 2020,
     },
+    {
+      month: 3,
+      year: 2020,
+    },
+    {
+      month: 4,
+      year: 2020,
+    },
   ]
   return (
     <div className="App">
       <header className="App-header">
-        <CalendarCarousel dates={dates}/>
+        <CalendarCarousel dates={dates} initialCenter={0}/>
       </header>
     </div>
   );

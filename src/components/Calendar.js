@@ -20,11 +20,17 @@ const englishMonthNames = [
 
 const gridUnit = 14.2857142857;
 
-function Calendar({ year, month, className, target }) {
+export function CalendarHoisted({
+  year,
+  month,
+  className,
+  target,
+  getBlackedOut,
+  setBlackedOut,
+}) {
   const [mouseState, setMouseState] = React.useState("up");
   const [deleteState, setDeleteState] = React.useState(false);
-  const [blackedOut, setBlackedOut] = React.useState({}); //Map of keyValue to bool
-
+  const blackedOut = getBlackedOut();
   function handleGooification(e) {
     if (!e.target.className.includes("__Calendar_Grid_Active")) return;
     const keyValue = e.target.getAttribute("id");
@@ -134,6 +140,7 @@ function Calendar({ year, month, className, target }) {
     <div className={className + " __Calendar"}>
       <header className="__Calendar_Header">
         <h1>{englishMonthNames[month]}</h1>
+        <h3>{year}</h3>
       </header>
       <div className="__Calendar_Body">
         <div
@@ -171,6 +178,21 @@ function Calendar({ year, month, className, target }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export function Calendar({ year, month, className, target }) {
+  const [blackedOut, setBlackedOut] = React.useState({});
+  const getBlackedOut = () => blackedOut;
+  return (
+    <CalendarHoisted
+      year={year}
+      month={month}
+      className={className}
+      target={target}
+      getBlackedOut={getBlackedOut}
+      setBlackedOut={setBlackedOut}
+    />
   );
 }
 export default Calendar;

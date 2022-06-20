@@ -2,6 +2,87 @@
     display:flex;
 
 }
+.__Calendar_Carousel_Cal_Holder{
+    display:flex;
+    overflow: scroll;
+    width:38em;
+    scroll-snap-align: center;
+    scroll-snap-type: proximity;
+    scroll-snap-stop: always;
+}
+
+.__Carousel_Calendar_Container{
+    z-index: 0;
+}
 .__Carousel_Calendar{
     font-size: 70%;
 }
+
+.__Carousel_Calendar_Invisible{
+    opacity: 0%;
+}
+
+
+@keyframes advance-underCard {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(1em);
+    }
+}
+
+
+/* Arrow Stuff */
+
+.__Calendar_Carousel_Left_Arrow{
+    transform: scaleX(-1);
+}
+.__Calendar_Carousel_Arrow{
+    display:flex;
+    justify-content:right;
+    align-items:center;
+}
+
+.arrow {
+    --__arrow_size: 1em;
+    --__arrow_width: 0.15em;
+    --__arrow_angle: 40deg;
+    cursor: pointer;
+    height: var(--__arrow_size);
+    transform: translateX(0%) translateY(0%);
+    transition: transform 0.5s;
+    width: var(--__arrow_size);
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .arrow-top, .arrow-bottom {
+    position:absolute;
+    width: var(--__arrow_width);
+    height:100%;
+    background-color: rgb(216, 216, 216);
+    top:0;
+    left:0;
+  }
+  .arrow:hover {
+    transform: translateX(10%) translateY(0%) scale(1.05);
+    filter: brightness(1.2);
+  }
+  .arrow-top {
+    transform: 
+        translateX(calc(var(--__arrow_size) - var(--__arrow_width)))
+        translateY(50%)
+        rotate(var(--__arrow_angle));
+    ;
+    transform-origin: top right;
+  }
+  .arrow-bottom {
+    transform: 
+        translateX(calc(var(--__arrow_size) - var(--__arrow_width)))
+        translateY(-50%)
+        rotate(calc( -1 * var(--__arrow_angle)));
+    transform-origin: bottom right;
+  }
+
+  /* End Arrow Stuff */
